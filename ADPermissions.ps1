@@ -18,7 +18,7 @@ $GroupName = $Group.SamAccountname
 
 
     Get-ADGroupMember $GroupName | 
-    Get-ADObject -Properties * | Where {$_.ObjectClass -NE "Computer"} | 
+    Get-ADObject -Properties * | Where {$_.ObjectClass -EQ "User"} | 
     Select-Object @{Name="Type";Expression={$_.ObjectClass}},
     @{Name="Full name";Expression={$_.DisplayName}},
     @{Name="Username";Expression={$_.SamAccountName}},
