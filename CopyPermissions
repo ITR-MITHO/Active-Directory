@@ -1,0 +1,18 @@
+<#
+
+The script will prompt you for two usernames. 
+The user who it should copy the permissions FROM and the user it should copy the permissions TO
+
+#>
+
+$CopyUser = Read-Host "Enter the username of the user whos permissions should be copied"
+$ReceiveUser = Read-Host "Enter the username of the user who should receive the permissions"
+Get-ADPrincipalGroupMembership -Identity $CopyUser | select SamAccountName | ForEach-Object {Add-ADGroupMember -Identity $_.SamAccountName -Members $ReceiveUser}
+
+Write-Host "
+    ###########################################################################
+    #                              COMPLETED                                  #
+    #        AD-permissions from $CopyUser added to $ReceiveUser                  
+    #                                                                         #
+    ###########################################################################
+    " -ForegroundColor Green
