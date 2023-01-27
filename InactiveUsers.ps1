@@ -1,12 +1,7 @@
 <#
 
 Finds users that haven't logged in within the last 90 days. 
-Exports the following information; 
-Displayname
-SamAccountName
-LastLogonDate
-PasswordLastSet
-Manager
+To change the search scope, change the number of days from "90" to "XX" where XX is how many days you want to look back.
 
 #>
 
