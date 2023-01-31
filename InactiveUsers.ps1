@@ -40,14 +40,55 @@ $MailboxValue = "RoomMailbox"
 
 }
 
+If ($User.msExchRecipientTypeDetails -eq "32")
+
+{
+
+$MailboxValue = "EquipmentMB"
+
+}
+
 if (-not $User.msExchRecipientTypeDetails)
+
 {
 
 $MailboxValue = "No Mailbox"
 
 }
+
+If ($User.msExchRecipientTypeDetails -eq "2147483648")
+
+{
+
+$MailboxValue = "RemoteUserMB"
+
+}
      
-$OUOutput = Get-ADUser $User | Select @{n='OU';e={$_.DistinguishedName -replace '^.+?,(CN|OU.+)','$1'}}
+
+If ($User.msExchRecipientTypeDetails -eq "8589934592")
+{
+
+$MailboxValue = "RemoteRoomMB"
+
+}
+
+
+If ($User.msExchRecipientTypeDetails -eq "17179869184")
+{
+
+$MailboxValue = "RemoteEquipMB"
+
+}
+
+
+If ($User.msExchRecipientTypeDetails -eq "34359738368")
+{
+
+$MailboxValue = "RemoteSharedMB"
+
+}
+
+$OU = Get-ADUser $User | Select @{n='OU';e={$_.DistinguishedName -replace '^.+?,(CN|OU.+)','$1'}}
 $Collection = New-Object PSObject -Property @{
 
 FullName = (Get-ADUser $User -Properties DisplayName).DisplayName
@@ -58,7 +99,7 @@ PWDReset = (Get-ADUser $User -Properties PasswordLastSet).PasswordLastSet
 Manager = (Get-ADUser $User -Properties Manager).Manager
 Enabled = (Get-ADUser $User -Properties Enabled).Enabled
 Type = $MailboxValue
-OU = $OUOutput
+OU = $OU.OU
 
 
 }
@@ -68,5 +109,5 @@ $ExportList += $Collection
 }
 
 # Select fields in specific order rather than random.
-$ExportList | Select FullName, Username, Created, LastlogonDate, PWDReset, Manager, Enabled, Type, OU | 
+$ExportList | Select FullName, Username, Created, LastlogonDate, PWDReset, Manager, Enabled, Type, OU  | 
 Export-csv $Home\Desktop\Report.csv -NoTypeInformation -Encoding Unicode
