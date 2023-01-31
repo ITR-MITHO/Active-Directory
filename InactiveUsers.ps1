@@ -7,7 +7,66 @@ To change the search scope, change the number of days from "90" to "XX" where XX
 
 Import-Module ActiveDirectory
 $Date = (Get-Date).AddDays(-90)
-Get-ADuser  -filter * -Properties DisplayName, SamAccountName, LastLogonDate, PasswordLastSet, Manager, WhenCreated | Where {$_.LastLogonDate -LT $Date} | Select DisplayName, SamAccountName, WhenCreated, LastLogonDate, PasswordLastSet, Manager, Enabled, @{n='OU';e={$_.distinguishedname -replace '^.+?,(CN|OU.+)','$1'}} |
-Export-csv $Home\Desktop\InactiveUsers.csv -Notypeinformation -Encoding Unicode
+$UserList = Get-ADuser -filter * -Properties * | Where {$_.LastLogonDate -LT $Date}
+$ExportList = @()
 
-Write-Host "Find the exported data here: $home\Desktop\InactiveUsers.csv" -ForegroundColor Green
+
+
+foreach ($User in $UserList) {
+
+
+If ($User.msExchRecipientTypeDetails -eq "1")
+{
+
+$MailboxValue = "UserMailbox"
+
+}
+
+
+If ($User.msExchRecipientTypeDetails -eq "4")
+
+{
+
+$MailboxValue = "SharedMailbox"
+
+}
+
+
+If ($User.msExchRecipientTypeDetails -eq "16")
+
+{
+
+$MailboxValue = "RoomMailbox"
+
+}
+
+if ($User.msExchRecipientTypeDetails -eq "")
+{
+
+$MailboxValue = "No Mailbox"
+
+}
+     
+$OUOutput = Get-ADUser $User | Select @{n='OU';e={$_.DistinguishedName -replace '^.+?,(CN|OU.+)','$1'}}
+$Collection = New-Object PSObject -Property @{
+
+FullName = (Get-ADUser $User -Properties DisplayName).DisplayName
+Username = (Get-ADUser $User -Properties SamAccountName).SamAccountName
+Created = (Get-ADUser $User -Properties WhenCreated).WhenCreated
+LastLogonDate = (Get-ADUser $User -Properties LastLogonDate).LastLogonDate
+PWDReset = (Get-ADUser $User -Properties PasswordLastSet).PasswordLastSet
+Manager = (Get-ADUser $User -Properties Manager).Manager
+Enabled = (Get-ADUser $User -Properties Enabled).Enabled
+Type = $MailboxValue
+OU = $OUOutput
+
+
+}
+
+$ExportList += $Collection
+
+}
+
+# Select fields in specific order rather than random.
+$ExportList | Select FullName, Username, Created, LastlogonDate, PWDReset, Manager, Enabled, Type, OU | 
+Export-csv $Home\Desktop\Report.csv -NoTypeInformation -Encoding Unicode
