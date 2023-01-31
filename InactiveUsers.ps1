@@ -4,7 +4,7 @@ Finds users that haven't logged in within the last 90 days.
 To change the search scope, change the number of days from "90" to "XX" where XX is how many days it should filter from
 
 #>
-
+Write-Host "The script can take 2 minutes to complete." -ForegroundColor Yellow
 Import-Module ActiveDirectory
 $Date = (Get-Date).AddDays(-90)
 $UserList = Get-ADuser -filter * -Properties * | Where {$_.LastLogonDate -LT $Date}
