@@ -40,7 +40,7 @@ $MailboxValue = "RoomMailbox"
 
 }
 
-if ($User.msExchRecipientTypeDetails -eq "")
+if (-not $User.msExchRecipientTypeDetails)
 {
 
 $MailboxValue = "No Mailbox"
