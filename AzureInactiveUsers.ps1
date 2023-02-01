@@ -161,7 +161,7 @@ $Date=("{0:s}" -f (get-date)).Split("T")[0] -replace "-", ""
 $Time=("{0:s}" -f (get-date)).Split("T")[1] -replace ":", ""
 $filerep = "AzureADUsersLastLogin_" + $Date + $Time + ".csv"
 try{
-    $ADUserep | Export-Csv -path $filerep -NoTypeInformation
+    $ADUserep | Export-Csv -path $filerep -NoTypeInformation -Encoding Unicode
 }catch{
     Write-Host ''
     Write-Host ''
