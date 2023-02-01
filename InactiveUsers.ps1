@@ -53,7 +53,7 @@ If ($User.msExchRecipientTypeDetails -eq "2147483648")
 
 {
 
-$MailboxValue = "RemoteUserMB"
+$MailboxValue = "RemoteUserMailbox"
 
 }
      
@@ -61,7 +61,7 @@ $MailboxValue = "RemoteUserMB"
 If ($User.msExchRecipientTypeDetails -eq "8589934592")
 {
 
-$MailboxValue = "RemoteRoomMB"
+$MailboxValue = "RemoteRoomMailbox"
 
 }
 
@@ -69,7 +69,7 @@ $MailboxValue = "RemoteRoomMB"
 If ($User.msExchRecipientTypeDetails -eq "17179869184")
 {
 
-$MailboxValue = "RemoteEquipMB"
+$MailboxValue = "RemoteEquipmentMailbox"
 
 }
 
@@ -77,7 +77,7 @@ $MailboxValue = "RemoteEquipMB"
 If ($User.msExchRecipientTypeDetails -eq "34359738368")
 {
 
-$MailboxValue = "RemoteSharedMB"
+$MailboxValue = "RemoteSharedMailbox"
 
 }
 
@@ -85,9 +85,11 @@ if (-not $User.msExchRecipientTypeDetails)
 
 {
 
-$MailboxValue = "No Mailbox"
+$MailboxValue = ""
 
 }
+
+
 
 
 $Manager = Get-ADObject $User -Properties Manager | Select-Object @{Name="Manager";Expression={(Get-ADUser -property DisplayName $_.Manager).DisplayName}} 
@@ -99,11 +101,11 @@ $MName = $Manager
 $OU = Get-ADUser $User | Select @{n='OU';e={$_.DistinguishedName -replace '^.+?,(CN|OU.+)','$1'}}
 $Collection = New-Object PSObject -Property @{
 
-FullName = (Get-ADUser $User -Properties DisplayName).DisplayName
+DisplayName = (Get-ADUser $User -Properties DisplayName).DisplayName
 Username = (Get-ADUser $User -Properties SamAccountName).SamAccountName
-Created = (Get-ADUser $User -Properties WhenCreated).WhenCreated
+WhenCreated = (Get-ADUser $User -Properties WhenCreated).WhenCreated
 LastLogonDate = (Get-ADUser $User -Properties LastLogonDate).LastLogonDate
-PWDReset = (Get-ADUser $User -Properties PasswordLastSet).PasswordLastSet
+PasswordLastSet = (Get-ADUser $User -Properties PasswordLastSet).PasswordLastSet
 Manager = $MName.Manager
 Enabled = (Get-ADUser $User -Properties Enabled).Enabled
 MailType = $MailboxValue
@@ -117,7 +119,7 @@ $ExportList += $Collection
 }
 
 # Select fields in specific order rather than random.
-$ExportList | Select FullName, Username, Created, LastlogonDate, PWDReset, Manager, Enabled, Type, OU  | 
+$ExportList | Select DisplayName, Username, WhenCreated, LastlogonDate, PasswordLastSet, Manager, Enabled, MailType, OU  | 
 Export-csv $Home\Desktop\InactiveUsers.csv -NoTypeInformation -Encoding Unicode
 
 Write-Host "Script completed. Find your export here: $Home\Desktop\InactiveUsers.csv" -ForegroundColor Green
