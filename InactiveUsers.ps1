@@ -6,8 +6,7 @@ To change the search scope, change the number of days from "90" to "XX" where XX
 #>
 Write-Host "The script can take up to two minutes to complete." -ForegroundColor Yellow
 Import-Module ActiveDirectory
-$Date = (Get-Date).AddDays(-90)
-$UserList = Get-ADuser -filter * -Properties * | Where {$_.LastLogonDate -LT $Date}
+$UserList = Get-ADuser -filter * -Properties *
 $ExportList = @()
 
 
