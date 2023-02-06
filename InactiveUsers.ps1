@@ -1,9 +1,3 @@
-<#
-
-Finds users that haven't logged in within the last 90 days. 
-To change the search scope, change the number of days from "90" to "XX" where XX is how many days it should filter from
-
-#>
 Write-Host "The script can take up to two minutes to complete." -ForegroundColor Yellow
 Import-Module ActiveDirectory
 $UserList = Get-ADuser -filter * -Properties *
@@ -12,83 +6,18 @@ $ExportList = @()
 
 
 foreach ($User in $UserList) {
-
-
-If ($User.msExchRecipientTypeDetails -eq "1")
-{
-
-$MailboxValue = "UserMailbox"
-
-}
-
-
-If ($User.msExchRecipientTypeDetails -eq "4")
-
-{
-
-$MailboxValue = "SharedMailbox"
-
-}
-
-
-If ($User.msExchRecipientTypeDetails -eq "16")
-
-{
-
-$MailboxValue = "RoomMailbox"
-
-}
-
-If ($User.msExchRecipientTypeDetails -eq "32")
-
-{
-
-$MailboxValue = "EquipmentMB"
-
-}
-
-
-If ($User.msExchRecipientTypeDetails -eq "2147483648")
-
-{
-
-$MailboxValue = "RemoteUserMailbox"
-
-}
-     
-
-If ($User.msExchRecipientTypeDetails -eq "8589934592")
-{
-
-$MailboxValue = "RemoteRoomMailbox"
-
-}
-
-
-If ($User.msExchRecipientTypeDetails -eq "17179869184")
-{
-
-$MailboxValue = "RemoteEquipmentMailbox"
-
-}
-
-
-If ($User.msExchRecipientTypeDetails -eq "34359738368")
-{
-
-$MailboxValue = "RemoteSharedMailbox"
-
-}
-
-if (-not $User.msExchRecipientTypeDetails)
-
-{
-
-$MailboxValue = ""
-
-}
-
-
+    
+    switch ($User.msExchRecipientTypeDetails) {
+        1 {$MailboxValue = "UserMailbox"}
+        4 {$MailboxValue = "SharedMailbox"}
+        16 {$MailboxValue = "RoomMailbox"}
+        32 {$MailboxValue = "EquipmentMB"}
+        2147483648 {$MailboxValue = "RemoteUserMailbox"}
+        8589934592 {$MailboxValue = "RemoteRoomMailbox"}
+        17179869184 {$MailboxValue = "RemoteEquipmentMailbox"}
+        34359738368 {$MailboxValue = "RemoteSharedMailbox"}
+        default {$MailboxValue = ""}
+      }
 
 
 $Manager = Get-ADObject $User -Properties Manager | Select-Object @{Name="Manager";Expression={(Get-ADUser -property DisplayName $_.Manager).DisplayName}} 
@@ -100,13 +29,13 @@ $MName = $Manager
 $OU = Get-ADUser $User | Select @{n='OU';e={$_.DistinguishedName -replace '^.+?,(CN|OU.+)','$1'}}
 $Collection = New-Object PSObject -Property @{
 
-DisplayName = (Get-ADUser $User -Properties DisplayName).DisplayName
-Username = (Get-ADUser $User -Properties SamAccountName).SamAccountName
-WhenCreated = (Get-ADUser $User -Properties WhenCreated).WhenCreated
-LastLogonDate = (Get-ADUser $User -Properties LastLogonDate).LastLogonDate
-PasswordLastSet = (Get-ADUser $User -Properties PasswordLastSet).PasswordLastSet
+DisplayName = ($User).DisplayName
+Username = ($User).SamAccountName
+WhenCreated = ($User).WhenCreated
+LastLogonDate = ($User).LastLogonDate
+PasswordLastSet = ($User).PasswordLastSet
 Manager = $MName.Manager
-Enabled = (Get-ADUser $User -Properties Enabled).Enabled
+Enabled = ($User).Enabled
 MailType = $MailboxValue
 OU = $OU.OU
 
