@@ -34,6 +34,8 @@ Username = ($User).SamAccountName
 WhenCreated = ($User).WhenCreated
 LastLogonDate = ($User).LastLogonDate
 PasswordLastSet = ($User).PasswordLastSet
+PasswordNeverExpires = ($User).PasswordNeverExpires
+PasswordExpired = ($User).PasswordExpired
 Manager = $MName.Manager
 Enabled = ($User).Enabled
 MailType = $MailboxValue
@@ -47,7 +49,7 @@ $ExportList += $Collection
 }
 
 # Select fields in specific order rather than random.
-$ExportList | Select DisplayName, Username, WhenCreated, LastlogonDate, PasswordLastSet, Manager, Enabled, MailType, OU  | 
+$ExportList | Select DisplayName, Username, WhenCreated, LastlogonDate, PasswordLastSet, PasswordNeverExpires, PasswordExpired, Manager, Enabled, MailType, OU  | 
 Export-csv $Home\Desktop\InactiveUsers.csv -NoTypeInformation -Encoding Unicode
 
 Write-Host "Script completed. Find your export here: $Home\Desktop\InactiveUsers.csv" -ForegroundColor Green
