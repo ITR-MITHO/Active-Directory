@@ -31,6 +31,7 @@ $Collection = New-Object PSObject -Property @{
 
 DisplayName = ($User).DisplayName
 Username = ($User).SamAccountName
+Description = ($User).Description
 WhenCreated = ($User).WhenCreated
 LastLogonDate = ($User).LastLogonDate
 PasswordLastSet = ($User).PasswordLastSet
@@ -49,7 +50,7 @@ $ExportList += $Collection
 }
 
 # Select fields in specific order rather than random.
-$ExportList | Select DisplayName, Username, WhenCreated, LastlogonDate, PasswordLastSet, PasswordNeverExpires, PasswordExpired, Manager, Enabled, MailType, OU  | 
+$ExportList | Select DisplayName, Username, Description, WhenCreated, LastlogonDate, PasswordLastSet, PasswordNeverExpires, PasswordExpired, Manager, Enabled, MailType, OU  | 
 Export-csv $Home\Desktop\InactiveUsers.csv -NoTypeInformation -Encoding Unicode
 
 Write-Host "Script completed. Find your export here: $Home\Desktop\InactiveUsers.csv" -ForegroundColor Green
