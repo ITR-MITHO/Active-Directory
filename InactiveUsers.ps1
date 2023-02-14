@@ -1,3 +1,11 @@
+$currentPrincipal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
+If (-not $currentPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator))
+{
+write-host "Script is not running as Administrator" -ForegroundColor Red
+Break
+}
+
+
 Write-Host "The script can take up to two minutes to complete." -ForegroundColor Yellow
 Import-Module ActiveDirectory
 $UserList = Get-ADuser -filter * -Properties *
