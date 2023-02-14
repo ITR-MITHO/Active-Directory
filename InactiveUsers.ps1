@@ -1,7 +1,7 @@
 $currentPrincipal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
 If (-not $currentPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator))
 {
-write-host "Script is not running as Administrator" -ForegroundColor Red
+write-host "Script is not running as Administrator" -ForegroundColor Yellow
 Break
 }
 
