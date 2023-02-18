@@ -53,4 +53,4 @@ $ExportList | Select DisplayName, Username, Description, WhenCreated, LastlogonD
 Export-csv C:\ITR\InactiveUsers.csv -NoTypeInformation -Encoding Unicode
 
 # Send e-mail
-Send-MailMessage -To "mitho@itrelation.dk" -From "InactiveUsers@domain.com" -SmtpServer domain-com.mail.protection.outlook.com -Port 25 -Subject "Report: Inactive Users" -Attachments C:\ITR\InactiveUsers.csv
+Send-MailMessage -To "email@domain.com" -From "InactiveUsers@domain.com" -SmtpServer domain-com.mail.protection.outlook.com -Port 25 -Subject "Report: Inactive Users" -Attachments C:\ITR\InactiveUsers.csv
