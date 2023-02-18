@@ -5,16 +5,12 @@ write-host "Script is not running as Administrator" -ForegroundColor Yellow
 Break
 }
 
-
 Write-Host "The script can take up to two minutes to complete." -ForegroundColor Yellow
 Import-Module ActiveDirectory
 $UserList = Get-ADuser -filter * -Properties *
 $ExportList = @()
 
-
-
 foreach ($User in $UserList) {
-    
     switch ($User.msExchRecipientTypeDetails) {
         1 {$MailboxValue = "UserMailbox"}
         4 {$MailboxValue = "SharedMailbox"}
@@ -26,7 +22,6 @@ foreach ($User in $UserList) {
         34359738368 {$MailboxValue = "RemoteSharedMailbox"}
         default {$MailboxValue = ""}
       }
-
 
 $Manager = Get-ADObject $User -Properties Manager | Select-Object @{Name="Manager";Expression={(Get-ADUser -property DisplayName $_.Manager).DisplayName}} 
 if ($Manager)
@@ -49,7 +44,6 @@ Manager = $MName.Manager
 Enabled = ($User).Enabled
 MailType = $MailboxValue
 OU = $OU.OU
-
 
 }
 
