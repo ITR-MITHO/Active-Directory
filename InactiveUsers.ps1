@@ -17,7 +17,7 @@ foreach ($User in $UserList) {
         4 {$MailboxValue = "SharedMailbox"}
         16 {$MailboxValue = "RoomMailbox"}
         32 {$MailboxValue = "EquipmentMailbox"}
-        128 {$MailboxValue} = "MailUser"
+        128 {$MailboxValue = "MailUser"}
         2147483648 {$MailboxValue = "RemoteUserMailbox"}
         8589934592 {$MailboxValue = "RemoteRoomMailbox"}
         17179869184 {$MailboxValue = "RemoteEquipmentMailbox"}
