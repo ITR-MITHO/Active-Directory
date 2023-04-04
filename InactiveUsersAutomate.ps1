@@ -5,12 +5,13 @@ $ExportList = @()
 
 
 foreach ($User in $UserList) {
-    
     switch ($User.msExchRecipientTypeDetails) {
         1 {$MailboxValue = "UserMailbox"}
+        2 {$MailboxValue = "LinkedMailbox"}
         4 {$MailboxValue = "SharedMailbox"}
         16 {$MailboxValue = "RoomMailbox"}
-        32 {$MailboxValue = "EquipmentMB"}
+        32 {$MailboxValue = "EquipmentMailbox"}
+        128 {$MailboxValue} = "MailUser"
         2147483648 {$MailboxValue = "RemoteUserMailbox"}
         8589934592 {$MailboxValue = "RemoteRoomMailbox"}
         17179869184 {$MailboxValue = "RemoteEquipmentMailbox"}
