@@ -12,11 +12,17 @@ If you're having any issues with the script, please reach out to me.
 https://github.com/ITR-MITHO
 #>
 
-
+# Checking permissions
+$PMError = Test-Path $Home\desktop\PermissionIssue.txt
+if ($PMError)
+{
+Remove-Item "$Home\desktop\PermissionIssue.txt" -Force
+}
 $currentPrincipal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
 If (-not $currentPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator))
 {
-write-host "Script is not running as Administrator" -ForegroundColor Yellow
+echo "Start PowerShell as an Administrator" > $Home\desktop\PermissionIssue.txt
+Start $home\desktop\PermissionIssue.txt
 Break
 }
 
