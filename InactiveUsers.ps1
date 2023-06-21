@@ -25,7 +25,7 @@ foreach ($User in $UserList) {
         default {$MailboxValue = ""}
       }
 
-$Manager = Get-ADObject $User -Properties Manager | Select-Object @{Name="Manager";Expression={(Get-ADUser -property DisplayName $_.Manager).DisplayName}} 
+$Manager = $User | Select-Object @{Name="Manager";Expression={(Get-ADUser -property DisplayName $_.Manager).DisplayName}} 
 if ($Manager)
 {
 $MName = $Manager
