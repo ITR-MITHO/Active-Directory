@@ -31,15 +31,16 @@ if ($Manager)
 $MName = $Manager
 }
 
-$OU = Get-ADUser $User | Select @{n='OU';e={$_.DistinguishedName -replace '^.+?,(CN|OU.+)','$1'}}
+$ErrorActionPreference = "SilentlyContinue"
+$OU = Get-ADUser $User | Select @{n='OU';e={$_.DistinguishedName -replace '^.+?,(CN|OU.+)','$1'}} -ErrorAction SilentlyContinue
 $Collection = New-Object PSObject -Property @{
 
 DisplayName = ($User).DisplayName
 Username = ($User).SamAccountName
 Description = ($User).Description
-WhenCreated = ($User).WhenCreated
-LastLogonDate = ($User).LastLogonDate
-PasswordLastSet = ($User).PasswordLastSet
+WhenCreated = ($User).WhenCreated.ToString("dd-MM-yyyy")
+LastLogonDate = ($User).LastLogonDate.ToString("dd-MM-yyyy")
+PasswordLastSet = ($User).PasswordLastSet.ToString("dd-MM-yyyy")
 PasswordNeverExpires = ($User).PasswordNeverExpires
 PasswordExpired = ($User).PasswordExpired
 Manager = $MName.Manager
