@@ -59,7 +59,7 @@ $PasswordLastSet = ""
 }
 
 
-$OU = Get-ADUser $User | Select @{n='OU';e={$_.DistinguishedName -replace '^.+?,(CN|OU.+)','$1'}} -ErrorAction SilentlyContinue
+$OU = $User | Select @{n='OU';e={$_.DistinguishedName -replace '^.+?,(CN|OU.+)','$1'}} -ErrorAction SilentlyContinue
 $Collection = New-Object PSObject -Property @{
 
 DisplayName = ($User).DisplayName
