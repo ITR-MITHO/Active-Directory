@@ -12,7 +12,7 @@ $AllGPO = Get-GPO -All -Domain $env:SERDNSDOMAIN
 
 ForEach ($GPO in $AllGPO) { 
     $Report = Get-GPOReport -Guid $GPO.Id -ReportType XML 
-    if ($Report -match '$Phrase') { 
+    if ($Report -match $Phrase) { 
         Write-Host "$($GPO.DisplayName)" -ForeGroundColor "Green"
         $MatchedGPOList += "$($GPO.DisplayName)";
 } 
