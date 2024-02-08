@@ -123,9 +123,9 @@ If ($DomainPWD.MinPasswordLength -LT 14) {
 Echo "
 Minimum password length is below 14 characters, we recommend using atleast 14 characters in passwords and a maximum password age set to 365 days" | Out-File $Home\Desktop\ADAssesment\3-PasswordPolicy.txt -Append
 }
-If ($DomainPWD.LockoutThreshold -LT 5)
+If ($DomainPWD.LockoutThreshold -GT 5)
 {
-Echo "LockOut ThreshHold is less than the CIS18 recommendation. This allows brute-force attacks to be more efficient. To follow CIS18 standards we recommend setting it to 5." | Out-File $Home\Desktop\ADAssesment\3-PasswordPolicy.txt -Append
+Echo "LockOut ThreshHold is higher than the CIS18 recommendation. This allows brute-force attacks to be more efficient. To follow CIS18 standards we recommend setting it to 5." | Out-File $Home\Desktop\ADAssesment\3-PasswordPolicy.txt -Append
 }
 If ($DomainPWD.LockoutDuration -LT "00:15:00") {
 Echo "Lockout Duration is less than the CIS18 recommendation. This allows brute-force attacks to be more efficient, To follow CIS18 standards we recommend setting it to 15" | Out-File $Home\Desktop\ADAssesment\3-PasswordPolicy.txt -Append
