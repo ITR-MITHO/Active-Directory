@@ -3,7 +3,6 @@
   THIS SCRIPT IS NOT READY FOR PRODUCTION, IT IS STILL BEING TESTED AND DEVELOPED. RUN AT YOUR OWN RISK
 
   Functionality:
-  Creates a logfile that specifies which changes was made by the script
   Stops and DISABLES the Print Spooler service on all domain controllers
   Enables AD Recycle Bin (If not already enabled)
   Removes all members from Schema Admins and Enterprise Admins
@@ -51,12 +50,12 @@ Echo "INFORMATION: AD Recycle bin enabled" | Out-File $LogFile -Append
 $Schema = Get-ADGroupMember -Identity "Schema Admins" | Get-ADUser -Properties SamAccountName
 Foreach ($S in $Schema)
 {
-Remove-ADGroupMember -Identity "Schema Admins" -Members $S.SamaccountName -Confirm:$false
+Remove-ADGroupMember -Identity "Schema Admins" -Members $S.SamaccountName -Confirm:$false -ErrorAction SilentlyContinue
 }
 $Enterprise = Get-ADGroupMember -Identity "Enterprise Admins" | Get-ADUser -Properties SamAccountName
 Foreach ($E in $Enterprise)
 {
-Remove-ADGroupMember -Identity "Enterprise Admins" -Members $E.SamaccountName -Confirm:$false
+Remove-ADGroupMember -Identity "Enterprise Admins" -Members $E.SamaccountName -Confirm:$false -ErrorAction SilentlyContinue
 }
 Echo "INFORMATION: Removed all members in Schema Admins and Enterprise Admins" | Out-File $LogFile -Append
 
@@ -101,16 +100,39 @@ Echo "Computer Configuration -> Windows Settings ->  Security Settings -> Local 
 # Export a list of all AD-users that have a password that never expires
 MKDIR $Home\Desktop\ADAssesment -ErrorAction SilentlyContinue | Out-Null
 Get-ADUser -Filter * -Properties DisplayName, SamAccountName, LastLogonDate, PasswordLastSet | Select DisplayName, SamAccountName, LastLogonDate, PasswordLastSet |
-Export-csv $Home\Desktop\ADAssesment\2-PasswordNeverExpire.csv -NoTypeInformation -Encoding Unicode
-
-# Export a list of the Default Domain Password Policy
-Get-ADDefaultDomainPasswordPolicy | Out-File $Home\Desktop\ADAssesment\3-PasswordPolicy.txt
+Export-csv $LogPath\2-PasswordNeverExpire.csv -NoTypeInformation -Encoding Unicode
 
 # Export a list of the audit policy
 auditpol /get /category:* | Out-File  $Home\desktop\ADAssesment\4-AuditPolicy.txt
 
 # Export a list of all administrator accounts
-Get-ADGroupMember "Domain admins" | Get-ADUser -Properties * | Select DisplayName, SamAccountName, LastLogonDate, PasswordLastSet, PasswordNeverExpires, Description |
-Export-csv $Home\Desktop\ADAssesment\5-DomainAdmins.csv -NoTypeInformation -Encoding Unicode
+Get-ADGroupMember "Domain admins" | Get-ADUser -Properties * -ErrorAction SilentlyContinue | Select DisplayName, SamAccountName, LastLogonDate, PasswordLastSet, PasswordNeverExpires, Description |
+Export-csv $LogPath\5-DomainAdmins.csv -NoTypeInformation -Encoding Unicode
+
+Get-ADGroupMember "Administrators" | Get-ADUser -Properties * -ErrorAction SilentlyContinue | Select DisplayName, SamAccountName, LastLogonDate, PasswordLastSet, PasswordNeverExpires, Description |
+Export-csv $LogPath\5-Administrators.csv -NoTypeInformation -Encoding Unicode
 
 Write-Host "Find all your logs in $Logpath" -ForegroundColor Green
+
+# Export a list of the Default Domain Password Policy with recommendations following CIS18 standard
+Get-ADDefaultDomainPasswordPolicy | Out-File $LogPath\3-PasswordPolicy.txt
+$DomainPWD = Get-ADDefaultDomainPasswordPolicy
+If ($DomainPWD) {
+}
+If ($DomainPWD.MinPasswordLength -LT 14) {
+Echo "
+Minimum password length is below 14 characters, we recommend using atleast 14 characters in passwords and a maximum password age set to 365 days" | Out-File $Home\Desktop\ADAssesment\3-PasswordPolicy.txt -Append
+}
+If ($DomainPWD.LockoutThreshold -LT 5)
+{
+Echo "LockOut ThreshHold is less than the CIS18 recommendation. This allows brute-force attacks to be more efficient. To follow CIS18 standards we recommend setting it to 5." | Out-File $Home\Desktop\ADAssesment\3-PasswordPolicy.txt -Append
+}
+If ($DomainPWD.LockoutDuration -LT "00:15:00") {
+Echo "Lockout Duration is less than the CIS18 recommendation. This allows brute-force attacks to be more efficient, To follow CIS18 standards we recommend setting it to 15" | Out-File $Home\Desktop\ADAssesment\3-PasswordPolicy.txt -Append
+}
+if ($DomainPWD.ComplexityEnabled -EQ $false) {
+Echo "Password complexity is not enabled - To add complexity to passwords, we advise you to enable this simple setting." | Out-File $Home\Desktop\ADAssesment\3-PasswordPolicy.txt -Append
+}
+If ($DomainPWD.PasswordHistoryCount -GE 10) {
+Echo "Password History is less than 10. By having a password history lower than 10, users will at somepoint be able to re-use their old passwords. To prevent this, we recommend setting it to atleast 20." | Out-File $Home\Desktop\ADAssesment\3-PasswordPolicy.txt -Append
+}
