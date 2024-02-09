@@ -98,7 +98,6 @@ Echo "Computer Configuration -> Windows Settings ->  Security Settings -> Local 
 #>
 
 # Export a list of all AD-users that have a password that never expires
-MKDIR $Home\Desktop\ADAssesment -ErrorAction SilentlyContinue | Out-Null
 Get-ADUser -Filter * -Properties DisplayName, SamAccountName, LastLogonDate, PasswordLastSet | Select DisplayName, SamAccountName, LastLogonDate, PasswordLastSet |
 Export-csv $LogPath\2-PasswordNeverExpire.csv -NoTypeInformation -Encoding Unicode
 
