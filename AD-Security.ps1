@@ -240,7 +240,7 @@ If ($Audit.SubCategory -EQ "Kerberos Authentication Service" -and $Audit.'Inclus
 {
 Echo "
 Target: Account Logon
-Subcategory: Kerberos Authentication Service
+Subcategory: Audit Kerberos Authentication Service
 Setting: Success/Failure" | Out-File $LogPath\4-Auditpolicy.txt -Append
 }
     }
