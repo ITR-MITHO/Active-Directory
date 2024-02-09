@@ -11,9 +11,9 @@
   Change primary group for all users to "Domain Users"
   Disables NTLMV1 and only allows NTLMV2 by registry
   Protects all Orginizational Units from accidential deletion
+  Tells you which audit policies are missing in your 'Default Domain Controller Policy'
   Creates a csv-file containing all AD-users that have a password that never expires
   Creates a file listing the Default Domain Password Policy
-  Creates a file listing the audit policies
   Creates a csv-file containing all administrator accounts
 
 #>
@@ -60,7 +60,7 @@ Remove-ADGroupMember -Identity "Enterprise Admins" -Members $E.SamaccountName -C
 Echo "INFORMATION: Removed all members in Schema Admins and Enterprise Admins" | Out-File $LogFile -Append
 
 # Prevent administrator accounts from being delegated
-Get-ADGroupMember "Domain Admins" | Get-ADuser -Properties AccountNotDelegated | Where-Object {-not $_.AccountNotDelegated -and $_.ObjectClass -EQ "User"} | Set-ADUser -AccountNotDelegated $True -ErrorAction SilentyContinue
+Get-ADGroupMember "Domain Admins" | Get-ADuser -Properties AccountNotDelegated | Where-Object {-not $_.AccountNotDelegated -and $_.ObjectClass -EQ "User"} | Set-ADUser -AccountNotDelegated $True
 Echo "INFORMATION: All members of Domain Admins set to not allow delegation" | Out-File $LogFile -Append
 
 # Protect Orginizational Units from accidental deletion
@@ -97,13 +97,10 @@ Echo "REMINDER: Change the Default Domain Controllers Policy with the below sett
 Echo "Computer Configuration -> Windows Settings ->  Security Settings -> Local Policies -> Security Options -> Network security: LAN Manager authentication level -> Send NTLMv2 response only\refuse LM & NTLM" | Out-File $LogFile -Append
 #>
 
-
 # Export a list of all AD-users that have a password that never expires
+MKDIR $Home\Desktop\ADAssesment -ErrorAction SilentlyContinue | Out-Null
 Get-ADUser -Filter * -Properties DisplayName, SamAccountName, LastLogonDate, PasswordLastSet | Select DisplayName, SamAccountName, LastLogonDate, PasswordLastSet |
 Export-csv $LogPath\2-PasswordNeverExpire.csv -NoTypeInformation -Encoding Unicode
-
-# Export a list of the audit policy
-auditpol /get /category:* | Out-File  $Home\desktop\ADAssesment\4-AuditPolicy.txt
 
 # Export a list of all administrator accounts
 Get-ADGroupMember "Domain admins" | Get-ADUser -Properties * -ErrorAction SilentlyContinue | Select DisplayName, SamAccountName, LastLogonDate, PasswordLastSet, PasswordNeverExpires, Description |
@@ -119,20 +116,127 @@ Get-ADDefaultDomainPasswordPolicy | Out-File $LogPath\3-PasswordPolicy.txt
 $DomainPWD = Get-ADDefaultDomainPasswordPolicy
 If ($DomainPWD) {
 }
-If ($DomainPWD.MinPasswordLength -LT 14) {
+If ($DomainPWD.MinPasswordLength -lt 14) {
 Echo "
 Minimum password length is below 14 characters, we recommend using atleast 14 characters in passwords and a maximum password age set to 365 days" | Out-File $Home\Desktop\ADAssesment\3-PasswordPolicy.txt -Append
 }
-If ($DomainPWD.LockoutThreshold -GT 5)
+If ($DomainPWD.LockoutThreshold -lt 5)
 {
-Echo "LockOut ThreshHold is higher than the CIS18 recommendation. This allows brute-force attacks to be more efficient. To follow CIS18 standards we recommend setting it to 5." | Out-File $Home\Desktop\ADAssesment\3-PasswordPolicy.txt -Append
+Echo "LockOut ThreshHold is less than the CIS18 recommendation. This allows brute-force attacks to be more efficient. To follow CIS18 standards we recommend setting it to 5." | Out-File $Home\Desktop\ADAssesment\3-PasswordPolicy.txt -Append
 }
-If ($DomainPWD.LockoutDuration -LT "00:15:00") {
+If ($DomainPWD.LockoutDuration -lt "00:15:00") {
 Echo "Lockout Duration is less than the CIS18 recommendation. This allows brute-force attacks to be more efficient, To follow CIS18 standards we recommend setting it to 15" | Out-File $Home\Desktop\ADAssesment\3-PasswordPolicy.txt -Append
 }
-if ($DomainPWD.ComplexityEnabled -EQ $false) {
+if ($DomainPWD.ComplexityEnabled -eq $false) {
 Echo "Password complexity is not enabled - To add complexity to passwords, we advise you to enable this simple setting." | Out-File $Home\Desktop\ADAssesment\3-PasswordPolicy.txt -Append
 }
 If ($DomainPWD.PasswordHistoryCount -LT 10) {
 Echo "Password History is less than 10. By having a password history lower than 10, users will at somepoint be able to re-use their old passwords. To prevent this, we recommend setting it to atleast 20." | Out-File $Home\Desktop\ADAssesment\3-PasswordPolicy.txt -Append
+}
+
+$AuditPolicySettings = auditpol /get /category:* /r | ConvertFrom-Csv | Select 'Target Policy', Subcategory, 'Inclusion Setting'
+Echo "Missing Advanced Audit Policies - Computer Configuration -> Security Settings -> Advanced Audit Policy Configuration" | Out-File $LogPath\4-Auditpolicy.txt
+
+If ($AuditPolicySettings.SubCategory -EQ "Security System Extension" -and $AuditPolicySettings.'Inclusion Setting' -EQ "No Auditing")
+{
+Echo "
+Target: System
+Subcategory: Audit Security System Extention
+Setting: Success/Failure" | Out-File $LogPath\4-Auditpolicy.txt -Append
+}
+
+If ($AuditPolicySettings.SubCategory -EQ "Logon" -and $AuditPolicySettings.'Inclusion Setting' -EQ "No Auditing")
+{
+Echo "
+Target: Logon/Logoff
+Subcategory: Audit Logon
+Setting: Success/Failure" | Out-File $LogPath\4-Auditpolicy.txt -Append
+}
+
+If ($AuditPolicySettings.SubCategory -EQ "Logoff" -and $AuditPolicySettings.'Inclusion Setting' -EQ "No Auditing")
+{
+Echo "
+Target: Logon/Logoff
+Subcategory: Audit Logoff
+Setting: Success/Failure" | Out-File $LogPath\4-Auditpolicy.txt -Append
+}
+
+If ($AuditPolicySettings.SubCategory -EQ "Special Logon" -and $AuditPolicySettings.'Inclusion Setting' -EQ "No Auditing")
+{
+Echo "
+Target: Logon/Logoff
+Subcategory: Audit Special Logon
+Setting: Success/Failure" | Out-File $LogPath\4-Auditpolicy.txt -Append
+}
+
+If ($AuditPolicySettings.SubCategory -EQ "Sensitive Privilege Use" -and $AuditPolicySettings.'Inclusion Setting' -EQ "No Auditing")
+{
+Echo "
+Target: Privilege Use
+Subcategory: Audit Sensitive Privilege Use
+Setting: Success/Failure" | Out-File $LogPath\4-Auditpolicy.txt -Append
+}
+
+If ($AuditPolicySettings.SubCategory -EQ "Process Creation" -and $AuditPolicySettings.'Inclusion Setting' -EQ "No Auditing")
+{
+Echo "
+Target: Detailed Tracking
+Subcategory: Audit Process Creation
+Setting: Success/Failure" | Out-File $LogPath\4-Auditpolicy.txt -Append
+}
+
+If ($AuditPolicySettings.SubCategory -EQ "DPAPI Activity" -and $AuditPolicySettings.'Inclusion Setting' -EQ "No Auditing")
+{
+Echo "
+Target: Detailed Tracking
+Subcategory: Audit DPAPI Activity
+Setting: Success/Failure" | Out-File $LogPath\4-Auditpolicy.txt -Append
+}
+
+If ($AuditPolicySettings.SubCategory -EQ "Authentication Policy Change" -and $AuditPolicySettings.'Inclusion Setting' -EQ "No Auditing")
+{
+Echo "
+Target: Policy Change
+Subcategory: Audit Authentication Policy Change
+Setting: Success/Failure" | Out-File $LogPath\4-Auditpolicy.txt -Append
+}
+
+If ($AuditPolicySettings.SubCategory -EQ "Computer Account Management" -and $AuditPolicySettings.'Inclusion Setting' -EQ "No Auditing")
+{
+Echo "
+Target: Account Management
+Subcategory: Audit Computer Account Management
+Setting: Success/Failure" | Out-File $LogPath\4-Auditpolicy.txt -Append
+}
+
+If ($AuditPolicySettings.SubCategory -EQ "Security Group Management" -and $AuditPolicySettings.'Inclusion Setting' -EQ "No Auditing")
+{
+Echo "
+Target: Account Management
+Subcategory: Audit Security Group Management
+Setting: Success/Failure" | Out-File $LogPath\4-Auditpolicy.txt -Append
+}
+
+If ($AuditPolicySettings.SubCategory -EQ "User Account Management" -and $AuditPolicySettings.'Inclusion Setting' -EQ "No Auditing")
+{
+Echo "
+Target: Account Management
+Subcategory: Audit User Account Management
+Setting: Success/Failure" | Out-File $LogPath\4-Auditpolicy.txt -Append
+}
+
+If ($AuditPolicySettings.SubCategory -EQ "Kerberos Service Ticket Operations" -and $AuditPolicySettings.'Inclusion Setting' -EQ "No Auditing")
+{
+Echo "
+Target: Account Logon
+Subcategory: Audit Kerberos Service Ticket Operations
+Setting: Success/Failure" | Out-File $LogPath\4-Auditpolicy.txt -Append
+}
+
+If ($AuditPolicySettings.SubCategory -EQ "Kerberos Authentication Service" -and $AuditPolicySettings.'Inclusion Setting' -EQ "No Auditing")
+{
+Echo "
+Target: Account Logon
+Subcategory: Kerberos Authentication Service
+Setting: Success/Failure" | Out-File $LogPath\4-Auditpolicy.txt -Append
 }
