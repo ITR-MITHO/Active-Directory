@@ -134,8 +134,8 @@ Echo "Password History is less than 10. By having a password history lower than 
 }
 
 $AuditPolicySettings = auditpol /get /category:* /r | ConvertFrom-Csv | Select Subcategory, 'Inclusion Setting'
-Echo "Missing Default Domain Controllers advanced audit policies - Computer Configuration -> Security Settings -> Advanced Audit Policy Configuration
-If there is no text below this line, audit policies are configured correctly" | Out-File $LogPath\4-Auditpolicy.txt
+Echo "Default Domain Controllers Policy - Computer Configuration -> Security Settings -> Advanced Audit Policy Configuration
+If there is no text below this line, audit policies are configured correctly with success/failure" | Out-File $LogPath\4-Auditpolicy.txt
 
 Foreach ($Audit in $AuditPolicySettings)
 {
