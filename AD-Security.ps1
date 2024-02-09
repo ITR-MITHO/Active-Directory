@@ -60,7 +60,7 @@ Remove-ADGroupMember -Identity "Enterprise Admins" -Members $E.SamaccountName -C
 Echo "INFORMATION: Removed all members in Schema Admins and Enterprise Admins" | Out-File $LogFile -Append
 
 # Prevent administrator accounts from being delegated
-Get-ADGroupMember "Domain Admins" | Get-ADuser -Properties AccountNotDelegated | Where-Object {-not $_.AccountNotDelegated -and $_.ObjectClass -EQ "User"} | Set-ADUser -AccountNotDelegated $True
+Get-ADGroupMember "Domain Admins" | Get-ADuser -Properties AccountNotDelegated | Where-Object {-not $_.AccountNotDelegated -and $_.ObjectClass -EQ "User"} | Set-ADUser -AccountNotDelegated $True -ErrorAction SilentyContinue
 Echo "INFORMATION: All members of Domain Admins set to not allow delegation" | Out-File $LogFile -Append
 
 # Protect Orginizational Units from accidental deletion
