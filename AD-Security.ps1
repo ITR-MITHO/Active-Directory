@@ -133,6 +133,6 @@ Echo "Lockout Duration is less than the CIS18 recommendation. This allows brute-
 if ($DomainPWD.ComplexityEnabled -EQ $false) {
 Echo "Password complexity is not enabled - To add complexity to passwords, we advise you to enable this simple setting." | Out-File $Home\Desktop\ADAssesment\3-PasswordPolicy.txt -Append
 }
-If ($DomainPWD.PasswordHistoryCount -GE 10) {
+If ($DomainPWD.PasswordHistoryCount -LT 10) {
 Echo "Password History is less than 10. By having a password history lower than 10, users will at somepoint be able to re-use their old passwords. To prevent this, we recommend setting it to atleast 20." | Out-File $Home\Desktop\ADAssesment\3-PasswordPolicy.txt -Append
 }
