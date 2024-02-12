@@ -140,21 +140,20 @@ Echo "Password History is less than 10. By having a password history lower than 
 }
 
 # Recommendation on users with a password that never expires
-$PasswordNeverExpires = ((Get-ADUser -Filter * -Properties PasswordNeverExpires).PasswordNeverExpires).count
+$PasswordNeverExpires = ((Get-ADUser -Filter * -Properties PasswordNeverExpires | Where {$_.PasswordNeverExpires -EQ $true}).PasswordNeverExpires).Count
 Echo "
 
-# Users with password never expire #
+# Users with a password that never expires #
 Found $PasswordNeverExpires users with a password that never expires. A csv-file was created containing all of the users. 
 Users with a password that never changes can pose a risk to the domain. If breached, they grant long-time access to the domain" | Out-File $Logpath\Recommendations.txt -Append
 
-Get-ADUser -Filter * -Properties DisplayName, SamAccountName, LastLogonDate, PasswordLastSet | Select DisplayName, SamAccountName, LastLogonDate, PasswordLastSet |
+Get-ADUser -Filter * -Properties DisplayName, SamAccountName, LastLogonDate, PasswordLastSet, PasswordNeverExpires | Where {$_.PasswordNeverExpires -EQ $true} | Select DisplayName, SamAccountName, LastLogonDate, PasswordLastSet |
 Export-csv $LogPath\PasswordNeverExpire.csv -NoTypeInformation -Encoding Unicode
 
 # Users locked in Active Directory caused by a bad password
 Echo "
 
-# Users locked in Active Directory because of a bad password #
-This should be investigated to determine if this is a brute-force attack or something else" | Out-File $LogPath\Recommendations.txt -Append
+# Users locked in Active Directory because of a bad password #" | Out-File $LogPath\Recommendations.txt -Append
 $LockedCount = (Get-WinEvent -ComputerName $env:COMPUTERNAME -FilterHashTable @{LogName='Security'; ID=4740} -ErrorAction SilentlyContinue).count
 If ($LockedCount -GE 1)
 {
@@ -173,7 +172,7 @@ Default Domain Controllers Policy - Computer Configuration -> Security Settings 
 $EventLog = Get-EventLog -List
 Foreach ($E in $EventLog)
 {
-If ($E.Log -eq "Security" -and $E.MaximumKiloBytes -LT "6194240")
+If ($E.Log -eq "Security" -and $E.MaximumKiloBytes -LT "4194240")
 {
 Echo "
 The eventlog 'Security' is not set to 4GB (Maximum size)" | Out-File $LogPath\Recommendations.txt -Append
