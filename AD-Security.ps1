@@ -150,6 +150,21 @@ Users with a password that never changes can pose a risk to the domain. If breac
 Get-ADUser -Filter * -Properties DisplayName, SamAccountName, LastLogonDate, PasswordLastSet | Select DisplayName, SamAccountName, LastLogonDate, PasswordLastSet |
 Export-csv $LogPath\PasswordNeverExpire.csv -NoTypeInformation -Encoding Unicode
 
+# Users locked in Active Directory caused by a bad password
+Echo "
+
+# Users locked in Active Directory because of a bad password #
+This should be investigated to determine if this is a brute-force attack or something else" | Out-File $LogPath\Recommendations.txt -Append
+$LockedCount = (Get-WinEvent -ComputerName $env:COMPUTERNAME -FilterHashTable @{LogName='Security'; ID=4740} -ErrorAction SilentlyContinue).count
+If ($LockedCount -GE 1)
+{
+Echo "Security logs indicate that one or more accounts was recently locked $LockedCount times because of a bad password." | Out-File $LogPath\Recommendations.txt -Append
+}
+Else
+{
+Echo "No accounts was recently locked in Active Directory" | Out-File $LogPath\Recommendations.txt -Append
+}
+
 # Recommendations based on settings found in Advanced Audit Policies
 Echo "
 
