@@ -83,7 +83,7 @@ Set-ADUser $Primary.SamAccountName -Replace @{PrimaryGroupID='513'} -ErrorAction
 }
 Echo "INFORMATION: Changed primary group of all users to 'Domain Users'" | Out-File $LogFile -Append
 
-Disable NTLMV1 and only allow NTLMV2  - DISABLED SINCE IT CAN IMPACT PRODUCTION
+# Disable NTLMV1 and only allow NTLMV2
 Echo "REMINDER: Change the Default Domain Controllers Policy with the below settings to disable NTLMV1 and only allow NTLMV2:" | Out-File $LogFile -Append
 Echo "Computer Configuration -> Windows Settings ->  Security Settings -> Local Policies -> Security Options -> Network security: LAN Manager authentication level -> Send NTLMv2 response only\refuse LM & NTLM" | Out-File $LogFile -Append
 
