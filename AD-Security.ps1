@@ -91,7 +91,6 @@ Echo "Computer Configuration -> Windows Settings ->  Security Settings -> Local 
 Get-ADUser -Filter * -Properties DisplayName, SamAccountName, LastLogonDate, PasswordLastSet | Select DisplayName, SamAccountName, LastLogonDate, PasswordLastSet |
 Export-csv $LogPath\PasswordNeverExpire.csv -NoTypeInformation -Encoding Unicode
 
-
 # Recommendations based on membership of the groups Domain Admins and Administrators
 Echo "# Domain Admins & Administrators groups #" | Out-File $Logpath\Recommendations.txt
 $DA = (Get-ADGroupMember "Domain admins").count
@@ -156,7 +155,6 @@ Echo "
 
 # Audit Policy settings #
 Default Domain Controllers Policy - Computer Configuration -> Security Settings -> Advanced Audit Policy Configuration" | Out-File $Logpath\Recommendations.txt -Append
-
 $EventLog = Get-EventLog -List
 Foreach ($E in $EventLog)
 {
