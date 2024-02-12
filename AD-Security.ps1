@@ -105,18 +105,21 @@ Echo "# Domain Admins & Administrators groups #" | Out-File $Logpath\Recommendat
 $DA = (Get-ADGroupMember "Domain admins").count
 If ($DA -GT 5)
 {
-Echo "More than 5 members in Domain Admins" | Out-File $Logpath\Recommendations.txt -Append
+Echo "
+$DA members found in domain admins, should be kept to a minimum of 5 members" | Out-File $Logpath\Recommendations.txt -Append
 }
-$DAExpire = ((Get-ADGroupMember "Domain Admins" | Get-ADUser -Properties SamAccountName, PasswordNeverExpires | Where {$_.PasswordNeverExpires -EQ $true}).SamAccountName).count
+$DAExpire = ((Get-ADGroupMember "Domain Admins" | Get-ADUser -Properties SamAccountName, PasswordNeverExpires -ErrorAction SilentlyContinue | Where {$_.PasswordNeverExpires -EQ $true}).SamAccountName).count
 If ($DAExpire -GT 1)
 {
-Echo "$DAExpire members of Domain Admins have a password that never expire" | Out-File $Logpath\Recommendations.txt -Append
+Echo "
+$DAExpire members of Domain Admins have a password that never expire" | Out-File $Logpath\Recommendations.txt -Append
 }
 
 $DAdmin = (Get-ADGroupMember "Administrators").count
 If ($DAdmin -GT 3)
 {
-Echo "More than 3 direct members of  the group Administrators. Only 'Administrator, Enterprise Admins and Domain Admins should be members'" | Out-File $Logpath\Recommendations.txt -Append
+Echo "
+$DAdmin members found in the group Administrators. Only 'Administrator, Enterprise Admins and Domain Admins' should be members of this group" | Out-File $Logpath\Recommendations.txt -Append
 }
 
 # Default Domain Password Policy recommendations following CIS18 standard
@@ -166,7 +169,7 @@ Foreach ($E in $EventLog)
 If ($E.Log -eq "Security" -and $E.MaximumKiloBytes -LT "6194240")
 {
 Echo "
-Security event log is not set to 4GB (Maximum size)" | Out-File $LogPath\Recommendations.txt -Append
+The eventlog 'Security' is not set to 4GB (Maximum size)" | Out-File $LogPath\Recommendations.txt -Append
 }
     }
 
