@@ -115,7 +115,7 @@ Echo "$DAExpire members of Domain Admins have a password that never expire" | Ou
 $GroupsinDA = ((Get-ADGroupMember "Domain Admins" | Get-ADObject | Where {$_.ObjectClass -EQ "Group"}).ObjectClass).Count
 If ($GroupsinDA -GE 1)
 {
-Echo "Found $GroupsinDA groups as a direct member of domain admins. Only user-objects should be a member of this group" | Out-File $LogPath\Recommendations.txt -Append
+Echo "$GroupsinDA groups is direct members of domain admins. Only user-objects should be a member of this group" | Out-File $LogPath\Recommendations.txt -Append
 }
 
 $DAdmin = (Get-ADGroupMember "Administrators").count
