@@ -2,17 +2,23 @@
 
   THIS SCRIPT IS NOT READY FOR PRODUCTION, IT IS STILL BEING TESTED AND DEVELOPED. RUN AT YOUR OWN RISK
 
-  Functionality:
+  Changes made to the domain controllers:
   Stops and DISABLES the Print Spooler service on all domain controllers
   Enables AD Recycle Bin (If not already enabled)
   Removes all members from Schema Admins and Enterprise Admins
   Prevents all domain admins from being delegated in the domain
   Enables PowerShell logging on all domain controllers
-  Change primary group for all users to "Domain Users"
+  Changes primary group for all users to "Domain Users"
   Disables NTLMV1 and only allows NTLMV2 by registry
   Protects all Orginizational Units from accidential deletion
-  Tells you which audit policies are missing in your 'Default Domain Controller Policy'
-  Creates a csv-file containing all AD-users that have a password that never expires
+
+  Recommendations:
+  Which audit policies are missing in your 'Default Domain Controller Policy' and where you change them
+  How many users have a password that never expires, and makes a list of all the accounts
+  Recommendations to Domain Admins and Administrators
+  Checking your password policy and gives CIS18 recommendations
+  Checking how many users was recently locked in Active Directory caused by bad passwords
+  
 
 #>
 # Standard Variables: 
