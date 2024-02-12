@@ -9,7 +9,7 @@
   Prevents all domain admins from being delegated in the domain
   Enables PowerShell logging on all domain controllers
   Changes primary group for all users to "Domain Users"
-  Disables NTLMV1 and only allows NTLMV2 by registry
+  Disables NTLMV1 and only allows NTLMV2 by registry and tells you where to make changes in your group policy
   Protects all Orginizational Units from accidential deletion
 
   Recommendations:
