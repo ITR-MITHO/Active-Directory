@@ -19,8 +19,8 @@
   Checking your password policy and gives CIS18 recommendations
   Checking how many users was recently locked in Active Directory caused by bad passwords
   
-
 #>
+
 # Standard Variables: 
 $LogPath = "$Home\Desktop\ADAssesment"
 $LogFile = "$Home\Desktop\ADAssesment\1-Logfile.txt"
@@ -141,8 +141,11 @@ Echo "Lockout Duration is less than the CIS18 recommendation. This allows brute-
 if ($DomainPWD.ComplexityEnabled -eq $false) {
 Echo "Password complexity is not enabled - To add complexity to passwords, we advise you to enable this simple setting." | Out-File $LogPath\Recommendations.txt -Append
 }
-If ($DomainPWD.PasswordHistoryCount -LT 10) {
-Echo "Password History is less than 10. By having a password history lower than 10, users will at somepoint be able to re-use their old passwords. To prevent this, we recommend setting it to atleast 20." | Out-File $LogPath\Recommendations.txt -Append
+If ($DomainPWD.PasswordHistoryCount -LT 24) {
+Echo "Password History is less than 24. By having a password history lower than 24, users will at somepoint be able to re-use their old passwords. To prevent this, we recommend setting it to atleast 24." | Out-File $LogPath\Recommendations.txt -Append
+}
+If (($DomainPWD.MinPasswordAge).Days -EQ 0) {
+Echo "Minimum password age is 0 days. To prevent users from cycling through passwords to use their favorite password, it should be set atleast 1 day" | Out-File $LogPath\Recommendations.txt -Append
 }
 
 # Recommendation on users with a password that never expires
