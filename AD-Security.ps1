@@ -13,7 +13,7 @@
   Protects all Orginizational Units from accidential deletion
 
   Recommendations:
-  Which audit policies are missing in your 'Default Domain Controller Policy' and where you change them
+  Which advanced audit policies is missing and where you change them
   How many users have a password that never expires, and makes a list of all the accounts
   Recommendations to Domain Admins and Administrators
   Checking your password policy and gives CIS18 recommendations
