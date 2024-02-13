@@ -133,13 +133,13 @@ Echo "Minimum password length is below 14 characters, we recommend using atleast
 }
 If ($DomainPWD.LockoutThreshold -lt 5)
 {
-Echo "LockOut ThreshHold is less than the CIS18 recommendation. This allows brute-force attacks to be more efficient. To follow CIS18 standards we recommend setting it to 5." | Out-File $LogPath\Recommendations.txt -Append
+Echo "Lockout Threshhold is less than the CIS18 recommendation. This allows brute-force attacks to be more efficient. To follow CIS18 standards we recommend setting it to 5." | Out-File $LogPath\Recommendations.txt -Append
 }
 If ($DomainPWD.LockoutDuration -lt "00:15:00") {
 Echo "Lockout Duration is less than the CIS18 recommendation. This allows brute-force attacks to be more efficient, To follow CIS18 standards we recommend setting it to 15" | Out-File $LogPath\Recommendations.txt -Append
 }
 if ($DomainPWD.ComplexityEnabled -eq $false) {
-Echo "Password complexity is not enabled - To add complexity to passwords, we advise you to enable this simple setting." | Out-File $LogPath\Recommendations.txt -Append
+Echo "Password complexity is not enabled. To add complexity to passwords, we advise you to enable this simple setting." | Out-File $LogPath\Recommendations.txt -Append
 }
 If ($DomainPWD.PasswordHistoryCount -LT 24) {
 Echo "Password History is less than 24. By having a password history lower than 24, users will at somepoint be able to re-use their old passwords. To prevent this, we recommend setting it to atleast 24." | Out-File $LogPath\Recommendations.txt -Append
