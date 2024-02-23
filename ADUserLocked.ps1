@@ -1,4 +1,4 @@
-$DC = Get-ADDomainController -Filter * | Select Hostname 
+
 $properties = @(
     @{n='User';e={$_.Properties[0].Value}},
     @{n='Locked by';e={$_.Properties[1].Value}},
@@ -7,6 +7,6 @@ $properties = @(
 )
 Foreach ($D in $DC)
 {
-Get-WinEvent -ComputerName $D.Hostname -FilterHashTable @{LogName='Security'; ID=4740} | 
-Select $properties
+Get-WinEvent -ComputerName $D.Hostname -FilterHashTable @{LogName='Security'; ID=4740} -ErrorAction SilentlyContinue | 
+Select $properties | Sort-Object TimeStamp
 }
