@@ -1,4 +1,4 @@
-
+$DC = Get-ADDomainController -Filter * | Select Hostname
 $properties = @(
     @{n='User';e={$_.Properties[0].Value}},
     @{n='Locked by';e={$_.Properties[1].Value}},
