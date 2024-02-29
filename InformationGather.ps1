@@ -2,16 +2,6 @@
 
   THIS SCRIPT IS NOT READY FOR PRODUCTION, IT IS STILL BEING TESTED AND DEVELOPED. RUN AT YOUR OWN RISK
 
-  Changes made to the domain controllers:
-  Stops and DISABLES the Print Spooler service on all domain controllers
-  Enables AD Recycle Bin (If not already enabled)
-  Removes all members from Schema Admins and Enterprise Admins
-  Prevents all domain admins from being delegated in the domain
-  Enables PowerShell logging on all domain controllers
-  Changes primary group for all users to "Domain Users"
-  Disables NTLMV1 and only allows NTLMV2 by registry and tells you where to make changes in your group policy
-  Protects all Orginizational Units from accidential deletion
-
   Recommendations:
   Which advanced audit policies is missing and where you change them
   How many users have a password that never expires, and makes a list of all the accounts
