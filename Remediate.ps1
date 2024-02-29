@@ -83,5 +83,10 @@ Set-ADUser $Primary.SamAccountName -Replace @{PrimaryGroupID='513'} -ErrorAction
 Echo "INFORMATION: Changed primary group of all users to 'Domain Users'" | Out-File $LogFile -Append
 
 # Disable NTLMV1 and only allow NTLMV2
+Foreach ($D in $DC)
+{
+Invoke-Command $D.HostName {
+New-ItemProperty -Path "HKLM:\System\CurrentControlSet\Control\Lsa\" -Name 'LmCompatibilityLevel' -PropertyType DWORD -Value 5 -ErrorAction SilentlyContinue | Out-Null}
+}
 Echo "REMINDER: Change the Default Domain Controllers Policy with the below settings to disable NTLMV1 and only allow NTLMV2:" | Out-File $LogFile -Append
 Echo "Computer Configuration -> Windows Settings ->  Security Settings -> Local Policies -> Security Options -> Network security: LAN Manager authentication level -> Send NTLMv2 response only\refuse LM & NTLM" | Out-File $LogFile -Append
