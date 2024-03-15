@@ -28,7 +28,11 @@ Echo "# Domain Admins & Administrators groups #" | Out-File $Logpath\Recommendat
 $DA = (Get-ADGroupMember "Domain admins").count
 If ($DA -GT 5)
 {
-Echo "$DA members found in domain admins, should be kept to a minimum of 5 members" | Out-File $Logpath\Recommendations.txt -Append
+
+Echo "
+Rule ID: itm8-DAMembers
+Priority: 3
+$DA members found in domain admins, should be kept to a minimum of 5 members" | Out-File $Logpath\Recommendations.txt -Append
 }
 $DAExpire = ((Get-ADGroupMember "Domain Admins" | Get-ADUser -Properties SamAccountName, PasswordNeverExpires -ErrorAction SilentlyContinue | Where {$_.PasswordNeverExpires -EQ $true}).SamAccountName).count
 If ($DAExpire -GT 1)
@@ -38,13 +42,19 @@ Echo "$DAExpire members of Domain Admins have a password that never expire" | Ou
 $GroupsinDA = ((Get-ADGroupMember "Domain Admins" | Get-ADObject | Where {$_.ObjectClass -EQ "Group"}).ObjectClass).Count
 If ($GroupsinDA -GE 1)
 {
-Echo "$GroupsinDA groups is direct members of domain admins. Only user-objects should be a member of this group" | Out-File $LogPath\Recommendations.txt -Append
+Echo "
+Rule ID: itm8-DAGroupMembers
+Priority: 3
+$GroupsinDA groups is direct members of domain admins. Only user-objects should be a member of this group" | Out-File $LogPath\Recommendations.txt -Append
 }
 
 $DAdmin = (Get-ADGroupMember "Administrators").count
 If ($DAdmin -GT 3)
 {
-Echo "$DAdmin members found in the group Administrators. Only 'Administrator, Enterprise Admins and Domain Admins' should be members of this group" | Out-File $Logpath\Recommendations.txt -Append
+Echo "
+Rule ID: itm8-AdministratorMembers
+Priority: 3
+$DAdmin members found in the group Administrators. Only 'Administrator, Enterprise Admins and Domain Admins' should be members of this group" | Out-File $Logpath\Recommendations.txt -Append
 }
 
 # Default Domain Password Policy recommendations following CIS18 standard
@@ -55,17 +65,29 @@ $DomainPWD = Get-ADDefaultDomainPasswordPolicy
 If ($DomainPWD) {
 }
 If ($DomainPWD.MinPasswordLength -lt 14) {
-Echo "Minimum password length is below 14 characters, we recommend using atleast 14 characters in passwords and a maximum password age set to 365 days" | Out-File $LogPath\Recommendations.txt -Append
+Echo "
+Rule ID: itm8-PWDMinLength
+Priority: 3
+Minimum password length is below 14 characters, we recommend using atleast 14 characters in passwords and a maximum password age set to 365 days" | Out-File $LogPath\Recommendations.txt -Append
 }
-If ($DomainPWD.LockoutThreshold -lt 5)
+If ($DomainPWD.LockoutThreshold -GT 5)
 {
-Echo "Lockout Threshhold is less than the CIS18 recommendation. This allows brute-force attacks to be more efficient. To follow CIS18 standards we recommend setting it to 5." | Out-File $LogPath\Recommendations.txt -Append
+Echo "
+Rule ID: itm8-LockedThreshold
+Priority: 3
+Lockout Threshhold is higher than the CIS18 recommendation. This allows brute-force attacks to be more efficient. To follow CIS18 standards we recommend setting it to 5." | Out-File $LogPath\Recommendations.txt -Append
 }
 If ($DomainPWD.LockoutDuration -lt "00:15:00") {
-Echo "Lockout Duration is less than the CIS18 recommendation. This allows brute-force attacks to be more efficient, To follow CIS18 standards we recommend setting it to 15" | Out-File $LogPath\Recommendations.txt -Append
+Echo "
+Rule ID: itm8-LockedDuration
+Priority: 3
+Lockout Duration is less than the CIS18 recommendation. This allows brute-force attacks to be more efficient, To follow CIS18 standards we recommend setting it to 15" | Out-File $LogPath\Recommendations.txt -Append
 }
 if ($DomainPWD.ComplexityEnabled -eq $false) {
-Echo "Password complexity is not enabled. To add complexity to passwords, we advise you to enable this simple setting." | Out-File $LogPath\Recommendations.txt -Append
+Echo 
+Rule ID: itm8-Complexity
+Priority: 3
+"Password complexity is not enabled. To add complexity to passwords, we advise you to enable this simple setting." | Out-File $LogPath\Recommendations.txt -Append
 }
 If ($DomainPWD.PasswordHistoryCount -LT 24) {
 Echo "Password History is less than 24. By having a password history lower than 24, users will at somepoint be able to re-use their old passwords. To prevent this, we recommend setting it to atleast 24." | Out-File $LogPath\Recommendations.txt -Append
@@ -159,7 +181,10 @@ Echo "
 $LockedCount = (Get-WinEvent -ComputerName $env:COMPUTERNAME -FilterHashTable @{LogName='Security'; ID=4740} -ErrorAction SilentlyContinue).count
 If ($LockedCount -GE 1)
 {
-Echo "Security logs indicate that one or more accounts was recently locked $LockedCount times because of a bad password." | Out-File $LogPath\Recommendations.txt -Append
+Echo "
+Rule ID: itm8-LockedAccounts
+Priority: 1
+Security logs indicate that one or more accounts was recently locked $LockedCount times because of a bad password." | Out-File $LogPath\Recommendations.txt -Append
 }
 Else
 {
