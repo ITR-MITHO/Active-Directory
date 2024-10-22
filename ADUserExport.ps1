@@ -33,12 +33,6 @@ foreach ($User in $UserList) {
         default {$MailboxValue = ""}
       }
 
-$Manager = $User | Select-Object @{Name="Manager";Expression={(Get-ADUser -property DisplayName $_.Manager).DisplayName}} 
-if ($Manager)
-{
-$MName = $Manager
-}
-
 IF ($User.WhenCreated)
 {
 $WhenCreated = $User.WhenCreated.ToString("dd-MM-yyyy")
@@ -78,7 +72,6 @@ LastLogonDate = $LastLogonDate
 PasswordLastSet = $PasswordLastSet
 PasswordNeverExpires = ($User).PasswordNeverExpires
 PasswordExpired = ($User).PasswordExpired
-Manager = $MName.Manager
 Enabled = ($User).Enabled
 MailType = $MailboxValue
 OU = $OU.OU
