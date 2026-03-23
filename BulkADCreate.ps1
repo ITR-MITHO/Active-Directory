@@ -6,7 +6,7 @@ $OutputPath = "$Home\Desktop\NewUsersWithPasswords.csv"
 $OU = "OU=Users,DC=yourdomain,DC=local"
 $Domain = "yourdomain.local"
 
-# Password generator
+# Generate random 15 character password
 function New-RandomPassword {
     param ([int]$Length = 15)
     $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_-+=[]{}'
@@ -55,12 +55,10 @@ foreach ($User in $Users) {
     try {
         $ADUser = Get-ADUser -Identity $User.Username
 
-        # Password never expires
         if ($User.PasswordNeverExpires -eq "True") {
             Set-ADUser -Identity $ADUser -PasswordNeverExpires $true
         }
 
-        # Manager (lookup by SamAccountName)
         if ($User.Manager) {
             $ManagerObj = Get-ADUser -Filter "SamAccountName -eq '$($User.Manager)'"
             if ($ManagerObj) {
