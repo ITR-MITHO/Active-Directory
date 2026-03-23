@@ -1,21 +1,22 @@
 Import-Module ActiveDirectory
 $ImportPath = "$Home\Desktop\ADUserExport.csv"
-
-# Path to output CSV with passwords
 $OutputPath = "$Home\Desktop\NewUsersWithPasswords.csv"
 
-# Generate random passwords
-function New-RandomPassword {
-    param (
-        [int]$Length = 15
-    )
+## Change these to ensure the correct OU is chosen and the correct domain is used when creating! ##
+$OU = "OU=Users,DC=yourdomain,DC=local"
+$Domain = "yourdomain.local"
 
+# Password generator
+function New-RandomPassword {
+    param ([int]$Length = 15)
     $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_-+=[]{}'
     -join ((1..$Length) | ForEach-Object { $chars | Get-Random })
 }
 
 $Users = Import-Csv $ImportPath
 $Output = @()
+
+# --- PASS 1: CREATE USERS ---
 foreach ($User in $Users) {
 
     $PasswordPlain = New-RandomPassword
@@ -24,15 +25,19 @@ foreach ($User in $Users) {
     try {
         New-ADUser `
             -SamAccountName $User.Username `
-            -UserPrincipalName ($User.Username + "@yourdomain.local") ` # REMEMBER TO CHANGE THIS TO THE CORRECT DOMAIN SUFFIX
+            -UserPrincipalName ($User.Username + "@$Domain") `
             -Name $User.DisplayName `
             -DisplayName $User.DisplayName `
-            -Enabled $true `
+            -Description $User.Description `
+            -Enabled ([System.Convert]::ToBoolean($User.Enabled)) `
+            -Title $User.Title `
+            -Department $User.Department `
+            -OfficePhone $User.TelephoneNumber `
+            -MobilePhone $User.Mobile `
             -AccountPassword $SecurePassword `
             -ChangePasswordAtLogon $true `
-            -Path "OU=Users,DC=yourdomain,DC=local" # REMEMBER TO CHANGE THIS TO THE CORRECT OU
+            -Path $OU
 
-        # Store output
         $Output += [PSCustomObject]@{
             SamAccountName = $User.Username
             DisplayName    = $User.DisplayName
@@ -44,6 +49,31 @@ foreach ($User in $Users) {
     }
 }
 
-# Export credentials
-$Output | Export-Csv $OutputPath -NoTypeInformation -Encoding UTF8
+# --- PASS 2: SET REMAINING ATTRIBUTES ---
+foreach ($User in $Users) {
+
+    try {
+        $ADUser = Get-ADUser -Identity $User.Username
+
+        # Password never expires
+        if ($User.PasswordNeverExpires -eq "True") {
+            Set-ADUser -Identity $ADUser -PasswordNeverExpires $true
+        }
+
+        # Manager (lookup by SamAccountName)
+        if ($User.Manager) {
+            $ManagerObj = Get-ADUser -Filter "SamAccountName -eq '$($User.Manager)'"
+            if ($ManagerObj) {
+                Set-ADUser -Identity $ADUser -Manager $ManagerObj.DistinguishedName
+            }
+        }
+
+    }
+    catch {
+        Write-Host "Failed to update user: $($User.Username)" -ForegroundColor Yellow
+    }
+}
+
+# Export passwords
+$Output | Export-Csv $OutputPath -NoTypeInformation -Encoding UNICODE
 Write-Host "Output file: $OutputPath" -ForegroundColor Green
