@@ -24,8 +24,8 @@ foreach ($User in $Users) {
 
     try {
         New-ADUser `
-            -SamAccountName $User.Username `
-            -UserPrincipalName ($User.Username + "@$Domain") `
+            -SamAccountName $User.SamAccountName `
+            -UserPrincipalName ($User.SamAccountName + "@$Domain") `
             -Name $User.DisplayName `
             -DisplayName $User.DisplayName `
             -Description $User.Description `
@@ -39,13 +39,13 @@ foreach ($User in $Users) {
             -Path $OU
 
         $Output += [PSCustomObject]@{
-            SamAccountName = $User.Username
+            SamAccountName = $User.SamAccountName
             DisplayName    = $User.DisplayName
             Password       = $PasswordPlain
         }
     }
     catch {
-        Write-Host "Failed to create user: $($User.Username)" -ForegroundColor Red
+        Write-Host "Failed to create user: $($User.SamAccountName)" -ForegroundColor Red
     }
 }
 
@@ -53,7 +53,7 @@ foreach ($User in $Users) {
 foreach ($User in $Users) {
 
     try {
-        $ADUser = Get-ADUser -Identity $User.Username
+        $ADUser = Get-ADUser -Identity $User.SamAccountName
 
         if ($User.PasswordNeverExpires -eq "True") {
             Set-ADUser -Identity $ADUser -PasswordNeverExpires $true
@@ -68,7 +68,7 @@ foreach ($User in $Users) {
 
     }
     catch {
-        Write-Host "Failed to update user: $($User.Username)" -ForegroundColor Yellow
+        Write-Host "Failed to update user: $($User.SamAccountName)" -ForegroundColor Yellow
     }
 }
 
