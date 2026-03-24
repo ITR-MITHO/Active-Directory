@@ -3,14 +3,36 @@ $ImportPath = "$Home\Desktop\ADUserExport.csv"
 $OutputPath = "$Home\Desktop\NewUsersWithPasswords.csv"
 
 ## Change these to ensure the correct OU is chosen and the correct domain is used when creating! ##
-$OU = "OU=Users,DC=yourdomain,DC=local"
-$Domain = "yourdomain.local"
+$OU = "OU=users,DC=contoso,DC=local"
+$Domain = "itm8exchangetest.dk"
 
-# Generate random 15 character password
+# Generate random 16 character password
 function New-RandomPassword {
-    param ([int]$Length = 15)
-    $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_-+=[]{}'
-    -join ((1..$Length) | ForEach-Object { $chars | Get-Random })
+    param ([int]$Length = 16)
+    if ($Length -lt 4) {
+        throw "Password length must be at least 4"
+    }
+    $lower   = 'abcdefghijklmnopqrstuvwxyz'.ToCharArray()
+    $upper   = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.ToCharArray()
+    $numbers = '0123456789'.ToCharArray()
+    $symbols = '!@#$%^&*()_-+=[]{}'.ToCharArray()
+
+    $passwordChars = @(
+        $lower   | Get-Random
+        $upper   | Get-Random
+        $numbers | Get-Random
+        $symbols | Get-Random
+    )
+
+    $allChars = $lower + $upper + $numbers + $symbols
+    $remaining = $Length - $passwordChars.Count
+    if ($remaining -gt 0) {
+        $passwordChars += 1..$remaining | ForEach-Object {
+            $allChars | Get-Random
+        }
+    }
+    $passwordChars = $passwordChars | Sort-Object { Get-Random }
+    return -join $passwordChars
 }
 
 $Users = Import-Csv $ImportPath
@@ -22,7 +44,6 @@ foreach ($User in $Users) {
     $PasswordPlain = New-RandomPassword
     $SecurePassword = ConvertTo-SecureString $PasswordPlain -AsPlainText -Force
 
-    try {
         New-ADUser `
             -SamAccountName $User.SamAccountName `
             -UserPrincipalName ($User.SamAccountName + "@$Domain") `
@@ -42,11 +63,9 @@ foreach ($User in $Users) {
             SamAccountName = $User.SamAccountName
             DisplayName    = $User.DisplayName
             Password       = $PasswordPlain
-        }
+
     }
-    catch {
-        Write-Host "Failed to create user: $($User.SamAccountName)" -ForegroundColor Red
-    }
+    
 }
 
 # --- PASS 2: SET REMAINING ATTRIBUTES ---
