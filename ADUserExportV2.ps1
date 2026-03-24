@@ -45,7 +45,7 @@ $ExportList += $Collection
 }
 
 # Select fields in specific order rather than random.
-$ExportList | Select DisplayName, Username, Description, PasswordNeverExpires, Enabled, MailType, Title, Department, Manager, TelephoneNumber, Mobile  | 
+$ExportList | Select DisplayName, SamAccountName, Description, PasswordNeverExpires, Enabled, MailType, Title, Department, Manager, TelephoneNumber, Mobile  | 
 Export-csv $Home\Desktop\ADUserExport.csv -NoTypeInformation -Encoding Unicode
 
 Write-Host "Script completed. Find your export here: $Home\Desktop\ADUserExport.csv" -ForegroundColor Green
